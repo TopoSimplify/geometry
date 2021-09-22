@@ -7,3 +7,9 @@ type Polygon struct {
 	Id   string
 	Meta string
 }
+
+//CreatePolygon constructs new Polygon
+func CreatePolygon(id string, coordinates []geom.Coords, meta string) Polygon {
+	return Polygon{geom.NewPolygon(coordinates...), id, meta}
+}
+
