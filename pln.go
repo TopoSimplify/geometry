@@ -10,13 +10,13 @@ import (
 //Polyline Type
 type Polyline struct {
 	*geom.LineString
-	Id string
+	Id   string
 	Meta string
 }
 
 //CreatePolyline construct new polyline
-func CreatePolyline(coordinates geom.Coords) Polyline {
-	return Polyline{geom.NewLineString(coordinates), ``, ``}
+func CreatePolyline(id string, coordinates geom.Coords, meta string) Polyline {
+	return Polyline{geom.NewLineString(coordinates), id, meta}
 }
 
 //SegmentBounds segment bounds
@@ -46,12 +46,12 @@ func (ln *Polyline) Segment(i, j int) *geom.Segment {
 	return geom.NewSegment(ln.Coordinates, i, j)
 }
 
-//generates sub polyline from generator indices
+//SubPolyline - generates sub polyline from generator indices
 func (ln *Polyline) SubPolyline(rng rng.Rng) Polyline {
-	return CreatePolyline(ln.SubCoordinates(rng))
+	return CreatePolyline(ln.Id, ln.SubCoordinates(rng), ln.Meta)
 }
 
-//generates sub polyline from generator indices
+//SubCoordinates - generates sub polyline from generator indices
 func (ln *Polyline) SubCoordinates(rng rng.Rng) geom.Coords {
 	var coords = ln.Coordinates
 	coords.Idxs = make([]int, 0, rng.J-rng.I+1)
@@ -61,7 +61,7 @@ func (ln *Polyline) SubCoordinates(rng rng.Rng) geom.Coords {
 	return coords
 }
 
-//Length of coordinates in polyline
+//Len - Length of coordinates in polyline
 func (ln *Polyline) Len() int {
 	return ln.Coordinates.Len()
 }
