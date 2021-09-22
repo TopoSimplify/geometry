@@ -1,3 +1,7 @@
+.idea
+sandbox
+*.iml
+
 # Binaries for programs and plugins
 *.exe
 *.exe~
