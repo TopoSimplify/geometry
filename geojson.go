@@ -13,6 +13,31 @@ const (
 	multiPolygonType    = "MultiPolygon"
 )
 
+
+type GeoJSONGeometries struct {
+	Points      []Point
+	LineStrings []Polyline
+	Polygons    []Polygon
+}
+
+type JSONPoint struct {
+	Id          string
+	Coordinates []float64
+	Meta        string
+}
+
+type JSONLineString struct {
+	Id          string
+	Coordinates [][]float64
+	Meta        string
+}
+
+type JSONPolygon struct {
+	Id          string
+	Coordinates [][][]float64
+	Meta        string
+}
+
 type GeoJSON struct {
 	Type string `json:"type"`
 }
@@ -39,10 +64,4 @@ func (gjson *GeoJSON) IsPolygon() bool {
 
 func (gjson *GeoJSON) IsMultiPolygon() bool {
 	return strings.ToLower(gjson.Type) == strings.ToLower(multiPolygonType)
-}
-
-type GeoJSONGeometries struct {
-	Points      []Point
-	LineStrings []Polyline
-	Polygons    []Polygon
 }
