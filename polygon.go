@@ -1,4 +1,4 @@
-package pln
+package geometry
 
 import "github.com/intdxdt/geom"
 
