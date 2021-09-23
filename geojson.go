@@ -9,6 +9,11 @@ import (
 	"strings"
 )
 
+type IGeometries interface {
+	Geometry() geom.Geometry
+}
+
+
 type GeoJSONGeometries struct {
 	Points      []Point
 	LineStrings []Polyline
