@@ -14,7 +14,7 @@ type Polyline struct {
 	Meta     string
 }
 
-func (g *Polyline) Geometry() geom.Geometry {
+func (g Polyline) Geometry() geom.Geometry {
 	return g.G
 }
 

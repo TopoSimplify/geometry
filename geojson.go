@@ -13,13 +13,6 @@ type IGeometries interface {
 	Geometry() geom.Geometry
 }
 
-
-type GeoJSONGeometries struct {
-	Points      []Point
-	LineStrings []Polyline
-	Polygons    []Polygon
-}
-
 type JSONPoint struct {
 	Id          string
 	Coordinates []float64
@@ -42,7 +35,7 @@ func ReadInputPolylines(inputJsonFile string) []Polyline {
 	return parseInputLinearFeatures(readJsonFile(inputJsonFile))
 }
 
-func ReadInputConstraints(inputJsonFile string) GeoJSONGeometries {
+func ReadInputConstraints(inputJsonFile string) []IGeometries {
 	return parseConstraintFeatures(readJsonFile(inputJsonFile))
 }
 
@@ -60,10 +53,8 @@ func parseInputLinearFeatures(inputs []string) []Polyline {
 	return plns
 }
 
-func parseConstraintFeatures(inputs []string) GeoJSONGeometries {
-	var pts = make([]Point, 0, len(inputs))
-	var plns = make([]Polyline, 0, len(inputs))
-	var polys = make([]Polygon, 0, len(inputs))
+func parseConstraintFeatures(inputs []string) []IGeometries {
+	var geometries = make([]IGeometries, 0, len(inputs))
 
 	for idx, fjson := range inputs {
 		feat, err := geojson.UnmarshalFeature([]byte(fjson))
@@ -71,25 +62,21 @@ func parseConstraintFeatures(inputs []string) GeoJSONGeometries {
 
 		var ptObjs = getPointObjects(idx, feat)
 		for _, o := range ptObjs {
-			pts = append(pts, createPoint(o))
+			geometries = append(geometries, createPoint(o))
 		}
 
 		var lnObjs = getLineStringObjects(idx, feat)
 		for _, o := range lnObjs {
-			plns = append(plns, createPolyline(o))
+			geometries = append(geometries, createPolyline(o))
 		}
 
 		var plyObjs = getPolygonObjects(idx, feat)
 		for _, o := range plyObjs {
-			polys = append(polys, createPolygon(o))
+			geometries = append(geometries, createPolygon(o))
 		}
 	}
 
-	return GeoJSONGeometries{
-		Points:      pts,
-		LineStrings: plns,
-		Polygons:    polys,
-	}
+	return geometries
 }
 
 func createPoint(jsonLine JSONPoint) Point {

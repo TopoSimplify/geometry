@@ -8,7 +8,7 @@ type Polygon struct {
 	Meta string
 }
 
-func (g *Polygon) Geometry() geom.Geometry {
+func (g Polygon) Geometry() geom.Geometry {
 	return g.G
 }
 

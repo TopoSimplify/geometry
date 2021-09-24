@@ -8,7 +8,7 @@ type Point struct {
 	Meta string
 }
 
-func (g *Point) Geometry() geom.Geometry {
+func (g Point) Geometry() geom.Geometry {
 	return g.G
 }
 
