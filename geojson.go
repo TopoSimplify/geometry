@@ -9,7 +9,7 @@ import (
 	"strings"
 )
 
-type IGeometries interface {
+type IGeometry interface {
 	Geometry() geom.Geometry
 }
 
@@ -35,7 +35,7 @@ func ReadInputPolylines(inputJsonFile string) []Polyline {
 	return parseInputLinearFeatures(readJsonFile(inputJsonFile))
 }
 
-func ReadInputConstraints(inputJsonFile string) []IGeometries {
+func ReadInputConstraints(inputJsonFile string) []IGeometry {
 	return parseConstraintFeatures(readJsonFile(inputJsonFile))
 }
 
@@ -53,8 +53,8 @@ func parseInputLinearFeatures(inputs []string) []Polyline {
 	return plns
 }
 
-func parseConstraintFeatures(inputs []string) []IGeometries {
-	var geometries = make([]IGeometries, 0, len(inputs))
+func parseConstraintFeatures(inputs []string) []IGeometry {
+	var geometries = make([]IGeometry, 0, len(inputs))
 
 	for idx, fjson := range inputs {
 		feat, err := geojson.UnmarshalFeature([]byte(fjson))
