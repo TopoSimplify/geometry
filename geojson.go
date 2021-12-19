@@ -32,11 +32,13 @@ type JSONPolygon struct {
 }
 
 func ReadInputPolylines(inputJsonFile string) []Polyline {
-	return parseInputLinearFeatures(readJsonFile(inputJsonFile))
+	var tokens = readJsonFile(inputJsonFile)
+	return parseInputLinearFeatures(tokens)
 }
 
 func ReadInputConstraints(inputJsonFile string) []IGeometry {
-	return parseConstraintFeatures(readJsonFile(inputJsonFile))
+	var tokens = readJsonFile(inputJsonFile)
+	return parseConstraintFeatures(tokens)
 }
 
 func parseInputLinearFeatures(inputs []string) []Polyline {
