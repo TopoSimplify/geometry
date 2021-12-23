@@ -9,8 +9,36 @@ import (
 	"strings"
 )
 
+const (
+	TypePoint             string = "Point"
+	TypeLineString        string = "LineString"
+	TypePolygon           string = "Polygon"
+	TypeMultiPoint        string = "MultiPoint"
+	TypeMultiLineString   string = "MultiLineString"
+	TypeMultiPolygon      string = "MultiPolygon"
+	TypeFeature           string = "Feature"
+	TypeFeatureCollection string = "FeatureCollection"
+)
+
 type IGeometry interface {
 	Geometry() geom.Geometry
+}
+
+type JSONType struct {
+	Type string `json:"type"`
+}
+
+func (o *JSONType) isGeometryType() bool {
+	return o.Type == TypePoint || o.Type == TypeLineString || o.Type == TypePolygon ||
+		o.Type == TypeMultiPoint || o.Type == TypeMultiLineString || o.Type == TypeMultiPolygon
+}
+
+func (o *JSONType) isFeatureType() bool {
+	return o.Type == TypeFeature
+}
+
+func (o *JSONType) isFeatureCollectionType() bool {
+	return o.Type == TypeFeatureCollection
 }
 
 type JSONPoint struct {
@@ -46,7 +74,7 @@ func parseInputLinearFeatures(inputs []string) []Polyline {
 	for idx, fjson := range inputs {
 		feat, err := geojson.UnmarshalFeature([]byte(fjson))
 		checkError(err)
-		var objs = getLineStringObjects(idx, feat)
+		var objs = lineStringFromFeature(idx, feat)
 		for _, o := range objs {
 			var pln = createPolyline(o)
 			plns = append(plns, pln)
@@ -59,20 +87,31 @@ func parseConstraintFeatures(inputs []string) []IGeometry {
 	var geometries = make([]IGeometry, 0, len(inputs))
 
 	for idx, fjson := range inputs {
+		var jtype JSONType
+		var err = json.Unmarshal([]byte(fjson), &jtype)
+
+		if jtype.isGeometryType() {
+			g, err := geojson.UnmarshalGeometry([]byte(fjson))
+			checkError(err)
+			println(g)
+		} else if jtype.isFeatureType() {
+
+		}
+
 		feat, err := geojson.UnmarshalFeature([]byte(fjson))
 		checkError(err)
 
-		var ptObjs = getPointObjects(idx, feat)
+		var ptObjs = pointsFromFeature(idx, feat)
 		for _, o := range ptObjs {
 			geometries = append(geometries, createPoint(o))
 		}
 
-		var lnObjs = getLineStringObjects(idx, feat)
+		var lnObjs = lineStringFromFeature(idx, feat)
 		for _, o := range lnObjs {
 			geometries = append(geometries, createPolyline(o))
 		}
 
-		var plyObjs = getPolygonObjects(idx, feat)
+		var plyObjs = polygonFromFeature(idx, feat)
 		for _, o := range plyObjs {
 			geometries = append(geometries, createPolygon(o))
 		}
@@ -98,59 +137,8 @@ func createPolygon(jsonLine JSONPolygon) Polygon {
 	return CreatePolygon(jsonLine.Id, coords, jsonLine.Meta)
 }
 
-func getPointObjects(index int, feat *geojson.Feature) []JSONPoint {
-	var objs = make([]JSONPoint, 0, 1)
-	var meta, err = json.Marshal(feat.Properties)
-	checkError(err)
-	if feat.Geometry.IsPoint() {
-		var id = composeId(index, getFId(feat.Properties), 0)
-		objs = append(objs, JSONPoint{id, feat.Geometry.Point, string(meta)})
-	} else if feat.Geometry.IsMultiPoint() {
-		objs = make([]JSONPoint, 0, len(feat.Geometry.MultiPoint))
-		for pos, coords := range feat.Geometry.MultiPoint {
-			var id = composeId(index, getFId(feat.Properties), pos)
-			objs = append(objs, JSONPoint{id, coords, string(meta)})
-		}
-	}
-	return objs
-}
-
-func getLineStringObjects(index int, feat *geojson.Feature) []JSONLineString {
-	var objs = make([]JSONLineString, 0, 1)
-	var meta, err = json.Marshal(feat.Properties)
-	checkError(err)
-	if feat.Geometry.IsLineString() {
-		var id = composeId(index, getFId(feat.Properties), 0)
-		objs = append(objs, JSONLineString{id, feat.Geometry.LineString, string(meta)})
-	} else if feat.Geometry.IsMultiLineString() {
-		objs = make([]JSONLineString, 0, len(feat.Geometry.MultiLineString))
-		for pos, coords := range feat.Geometry.MultiLineString {
-			var id = composeId(index, getFId(feat.Properties), pos)
-			objs = append(objs, JSONLineString{id, coords, string(meta)})
-		}
-	}
-	return objs
-}
-
-func getPolygonObjects(index int, feat *geojson.Feature) []JSONPolygon {
-	var objs = make([]JSONPolygon, 0, 1)
-	var meta, err = json.Marshal(feat.Properties)
-	checkError(err)
-	if feat.Geometry.IsPolygon() {
-		var id = composeId(index, getFId(feat.Properties), 0)
-		objs = append(objs, JSONPolygon{id, feat.Geometry.Polygon, string(meta)})
-	} else if feat.Geometry.IsMultiPolygon() {
-		objs = make([]JSONPolygon, 0, len(feat.Geometry.MultiPolygon))
-		for pos, coords := range feat.Geometry.MultiPolygon {
-			var id = composeId(index, getFId(feat.Properties), pos)
-			objs = append(objs, JSONPolygon{id, coords, string(meta)})
-		}
-	}
-	return objs
-}
-
 func getFId(properties map[string]interface{}) string {
-	var id = properties["id"]
+	var id = properties["mn id"]
 	if id == nil {
 		return "?"
 	}
@@ -169,10 +157,4 @@ func readJsonFile(file string) []string {
 		tokens[i] = strings.TrimSpace(tokens[i])
 	}
 	return tokens
-}
-
-func checkError(err error) {
-	if err != nil {
-		panic(err)
-	}
 }
