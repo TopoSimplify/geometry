@@ -91,7 +91,7 @@ func TestGeoJSON_IO_LineStrings(t *testing.T) {
 			textFile = strings.TrimSpace(textFile)
 			var inputs = strings.Split(textFile, "\n")
 			var igeoms = parseInputLinearFeatures(inputs)
-			g.Assert(len(igeoms)).Equal(len(igeoms))
+			g.Assert(len(igeoms)).Equal(4)
 		})
 	})
 }
