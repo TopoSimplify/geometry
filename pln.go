@@ -9,30 +9,30 @@ import (
 
 //Polyline Type
 type Polyline struct {
-	G *geom.LineString
-	Id       string
-	Meta     string
+	G    *geom.LineString
+	Id   string
+	Meta string
 }
 
-func (g Polyline) Geometry() geom.Geometry {
-	return g.G
+//Geometry interface
+func (pln Polyline) Geometry() geom.Geometry {
+	return pln.G
 }
-
 
 //CreatePolyline construct new polyline
 func CreatePolyline(id string, coordinates geom.Coords, meta string) Polyline {
 	return Polyline{geom.NewLineString(coordinates), id, meta}
 }
 
-//SegmentBounds segment bounds
-func (ln *Polyline) SegmentBounds() []mono.MBR {
+//SegmentBounds computes segment bounds
+func (pln *Polyline) SegmentBounds() []mono.MBR {
 	var I, J int
-	var n = ln.Len() - 1
+	var n = pln.Len() - 1
 	var a, b *geom.Point
 	var items = make([]mono.MBR, 0, n)
 	for i := 0; i < n; i++ {
-		a, b = ln.G.Coordinates.Pt(i), ln.G.Coordinates.Pt(i+1)
-		I, J = ln.G.Coordinates.Idxs[i], ln.G.Coordinates.Idxs[i+1]
+		a, b = pln.G.Coordinates.Pt(i), pln.G.Coordinates.Pt(i+1)
+		I, J = pln.G.Coordinates.Idxs[i], pln.G.Coordinates.Idxs[i+1]
 		items = append(items, mono.MBR{
 			MBR: mbr.CreateMBR(a[geom.X], a[geom.Y], b[geom.X], b[geom.Y]),
 			I:   I, J: J,
@@ -42,23 +42,23 @@ func (ln *Polyline) SegmentBounds() []mono.MBR {
 }
 
 //Range of entire polyline
-func (ln *Polyline) Range() rng.Rng {
-	return rng.Range(ln.G.Coordinates.FirstIndex(), ln.G.Coordinates.LastIndex())
+func (pln *Polyline) Range() rng.Rng {
+	return rng.Range(pln.G.Coordinates.FirstIndex(), pln.G.Coordinates.LastIndex())
 }
 
 //Segment given range
-func (ln *Polyline) Segment(i, j int) *geom.Segment {
-	return geom.NewSegment(ln.G.Coordinates, i, j)
+func (pln *Polyline) Segment(i, j int) *geom.Segment {
+	return geom.NewSegment(pln.G.Coordinates, i, j)
 }
 
 //SubPolyline - generates sub polyline from generator indices
-func (ln *Polyline) SubPolyline(rng rng.Rng) Polyline {
-	return CreatePolyline(ln.Id, ln.SubCoordinates(rng), ln.Meta)
+func (pln *Polyline) SubPolyline(rng rng.Rng) Polyline {
+	return CreatePolyline(pln.Id, pln.SubCoordinates(rng), pln.Meta)
 }
 
 //SubCoordinates - generates sub polyline from generator indices
-func (ln *Polyline) SubCoordinates(rng rng.Rng) geom.Coords {
-	var coords = ln.G.Coordinates
+func (pln *Polyline) SubCoordinates(rng rng.Rng) geom.Coords {
+	var coords = pln.G.Coordinates
 	coords.Idxs = make([]int, 0, rng.J-rng.I+1)
 	for i := rng.I; i <= rng.J; i++ {
 		coords.Idxs = append(coords.Idxs, i)
@@ -66,7 +66,7 @@ func (ln *Polyline) SubCoordinates(rng rng.Rng) geom.Coords {
 	return coords
 }
 
-//Len - Length of coordinates in polyline
-func (ln *Polyline) Len() int {
-	return ln.G.Coordinates.Len()
+//Len - number of coordinates in polyline
+func (pln *Polyline) Len() int {
+	return pln.G.Coordinates.Len()
 }

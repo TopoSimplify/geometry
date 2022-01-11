@@ -8,11 +8,12 @@ type Polygon struct {
 	Meta string
 }
 
+//Geometry interface
 func (g Polygon) Geometry() geom.Geometry {
 	return g.G
 }
 
-//CreatePolygon constructs new Polygon
+//CreatePolygon creates a new Polygon
 func CreatePolygon(id string, coordinates []geom.Coords, meta string) Polygon {
 	return Polygon{geom.NewPolygon(coordinates...), id, meta}
 }
